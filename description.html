@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+<title>Diagnoatic byte</title>
+<meta name="keywords" content="licor">
+<meta name="description" content="binary diagnostic values">
+<style type="text/css">
+body {background-color:ffffff;background-image:url(http://);background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
+h2{font-family:Arial;color:000000;}
+p {font-family:Arial;font-size:14px;font-style:normal;font-weight:normal;color:000000;}
+</style>
+</head>
+
+<body bgcolor="#000000" text="#F5F5DC">
+<h2>Diagnoatic byte description</h2>
+<table border="1" bordercolor="#F5F5DC" style="background-color:#000000" width="100%" cellpadding="3" cellspacing="3">
+	<tr>
+		<td width="150">Sync Flag</td>
+		<td>Not used in LI-7200. Will always read OK.</td>
+	</tr>
+	<tr>
+		<td>PLL</td>
+		<td>Phase Lock Loop offset, indicates the status of the optical filter wheel for the IRGA. Common causes of a service indication are not having a sensor head connected to the LI-7550, or the 19-pin IRGA cable is attached but the connectors have not been tightened properly.</td>
+	</tr>
+	<tr>
+		<td>Detector Temperature</td>
+		<td>If not OK, indicates the detector cooler is not maintaining the proper temperature: this will happen at temperatures above 50 &deg;C. Note that this does not always indicate a serious problem; the cooler may simply have not yet reached the target temperature during instrument startup, 
+or it may be out of range due to external environmental conditions. Readings may still be OK. The sensor head may not be attached to the LI-7550, or the IRGA cable may not be tight. Check cables and wiring.</td>
+	</tr>
+	<tr>
+		<td>Chopper Temperature</td>
+		<td>If not OK, indicates the chopper temperature controller is out of range, hot or cold. As with the Detector Temperature indicator above, this may or may not indicate a serious problem. The chopper should be able to temperature control when ambient is between +50 and -25 &deg;C. Check that the sensor head cables to the LI-7550 are tight, and make sure the chopper temperature is not set to Winter when measuring in high ambient temperatures.</td>
+	</tr>
+	<tr>
+		<td>Head Pressure</td>
+		<td>If not OK, the pressure reading at the LI-7200 sensor head is outside of its normal range. A service indication can also be caused by a loose or missing cable between the LI-7550 and the LI-7200 sensor head.</td>
+	</tr>
+	<tr>
+		<td>Aux Inputs</td>
+		<td>If not OK, indicates that the two reference voltages on the LI-7550 analog circuit board cannot be checked properly. The LI-7550 needs service.</td>
+	</tr>
+	<tr>
+		<td>Inlet T</td>
+		<td>If not OK, the temperature reading at the LI-7200 sensor head inlet is outside of its normal range. This can be caused by a loose or missing cable between the LI-7550 and the LI-7200 sensor head, or the inlet thermocouple has been broken.</td>
+	</tr>
+	<tr>
+		<td>Outlet T</td>
+		<td>If not OK, the temperature reading at the LI-7200 sensor head outlet is outside of its normal range. This can be caused by a loose or missing cable between the LI-7550 and the LI-7200 sensor head, or the outlet thermocouple has been broken.</td>
+	</tr>
+	<tr>
+		<td>Head</td>
+		<td>Displays the model of the sensor head currently connected to the LI-7550 Analyzer Interface Unit (LI-7500A or LI-7200).</td>
+	</tr>
+</table>
+</body>
+</html>
