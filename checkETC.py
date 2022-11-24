@@ -2,7 +2,7 @@
 """
 Created on Tue Sep 27 14:34:30 2022
 
-@author: Eric Larmanou
+@author: Eric Larmanou, Aarhus university, Denmark
 Perform QC of biomet and eddy covariance data
 3 main functions are:
     -QC: perform tests on 1 specific day
