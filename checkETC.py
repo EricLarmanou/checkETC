@@ -11,9 +11,12 @@ Perform QC of biomet and eddy covariance data
     
 it requires:
     -an ini file containg general information
-    -a config file (csv), with information per data file type
+    -a config file (csv), with information per data file type (Warning: editing csvl files in excel mess up the double quotes)
     -a html template file for the report: ReportEmpty.html    
     -for each data type, a header file (csv), listing the column names and some criterias
+    
+todo: add range min and max in figures
+      read Input Arguments
 """
 
 from zipfile import ZipFile
@@ -40,16 +43,15 @@ def ListReports(FileINI, Years=None):
     ReadIni(FileINI)
     
     FolderHome = Settings['FolderHTMLReport'].split('<')[0]
-    FoldersYear = glob(FolderHome + '*\\')
+    FoldersYear = sorted(glob(FolderHome + '*\\'))
     for FolderYear in FoldersYear:
         Year = os.path.basename(os.path.normpath(FolderYear))
-        FoldersDay = glob(FolderYear + '*\\')
+        FoldersDay = sorted(glob(FolderYear + '*\\'))
         DF_Result = pd.DataFrame()
         for FolderDay in FoldersDay:
             FileReport = os.path.join(FolderDay, 'Report.html')
             FileFlag = os.path.join(FolderDay, 'Flags.csv')
             if os.path.exists(FileReport) and os.path.exists(FileFlag):
-                #Result['Report'] = '<a href="' + FileReport.replace(FolderHome, '') + '">' + os.path.basename(os.path.normpath(FolderDay)) + '</a>'
                 DF_Flag = pd.read_csv(FileFlag, index_col=[0])
                 DF_Flag.index = ['<a href="' + FileReport.replace(FolderHome, '') + '">' + DF_Flag.index + '</a>']
                 DF_Result = pd.concat([DF_Result, DF_Flag])
@@ -101,9 +103,9 @@ def QC(FileINI, DateCheck = None):
             PathMask = PathMask.replace('<YYYY>', Settings['Year'])
             PathMask = PathMask.replace('<MM>', Settings['Month'])
             PathMask = PathMask.replace('<DD>', Settings['Day'])
-            Files = glob(PathMask)
+            Files = sorted(glob(PathMask))
             if IsEC:
-                #for EC files, we cannot use file names because the file ending at midnight is actually from the day before, so we use a filter based on datetime
+                #for EC files, we cannot use file names because the 30m-file ending at midnight is actually from the day before, so we use a filter based on datetime
                 DateStart = datetime.combine(DateCheck, datetime.min.time())
                 DateEnd = datetime.combine(DateCheck, datetime.min.time()) + timedelta(days=1)
                 DateFiles = [FileName2Date(os.path.basename(File)) for File in Files]
@@ -170,31 +172,32 @@ def QC(FileINI, DateCheck = None):
             DF_ResultGroup = pd.concat([DF_ResultGroup,
                                         pd.DataFrame({'Group':NameGroup, 'OkNumberFile':OkNbFiles, 'NumberFile':str(NumberFiles) + '/' + str(Group['NumberFiles']), 'OkData': OkData}, index=[NameGroup]).astype(object)], 
                                         ignore_index=True)
-            
-    #add summary table of groups
-    Style = DF_ResultGroup.loc[:,['Group','OkNumberFile','NumberFile','OkData']].style.format(na_rep='')
-    Style.applymap(ColorBool, subset=DF_ResultGroup.columns[DF_ResultGroup.dtypes==object])
-    Style.applymap(ColorNbFiles, subset='NumberFile')
-    Style.set_table_styles([{'selector': '*', 'props': [('border','1px solid beige')]}])
-    Style.hide(axis="index")
-    Summary = Style.to_html()
     
-    #add summary table of files
-    Style = DF_Result.style.format(na_rep='')
-    Style.applymap(ColorBool, subset=DF_Result.columns[DF_Result.dtypes==object])
-    Style.set_table_styles([{'selector': '*', 'props': [('border','1px solid beige')]}])
-    Style.hide(axis="index")
-    Summary += Style.to_html(render_links=True)
-    Report.FileContent = Report.FileContent.replace('***SUMMARY***', Summary)
-    
-    #terminate the report
-    Report.Terminate()
-    
-    #save short result to as csv file
-    DF_Flags = pd.DataFrame(DF_ResultGroup.OkData & DF_ResultGroup.OkNumberFile).transpose()
-    DF_Flags.index = [DateCheck]
-    DF_Flags.columns = DF_ResultGroup.Group
-    DF_Flags.to_csv(os.path.join(Settings['FolderHTMLReport'], 'Flags.csv'))
+    if not DF_ResultGroup.empty:
+        #add summary table of groups
+        Style = DF_ResultGroup.loc[:,['Group','OkNumberFile','NumberFile','OkData']].style.format(na_rep='')
+        Style.applymap(ColorBool, subset=DF_ResultGroup.columns[DF_ResultGroup.dtypes==object])
+        Style.applymap(ColorNbFiles, subset='NumberFile')
+        Style.set_table_styles([{'selector': '*', 'props': [('border','1px solid beige')]}])
+        Style.hide(axis="index")
+        Summary = Style.to_html()
+        
+        #add summary table of files
+        Style = DF_Result.style.format(na_rep='')
+        Style.applymap(ColorBool, subset=DF_Result.columns[DF_Result.dtypes==object])
+        Style.set_table_styles([{'selector': '*', 'props': [('border','1px solid beige')]}])
+        Style.hide(axis="index")
+        Summary += Style.to_html(render_links=True)
+        Report.FileContent = Report.FileContent.replace('***SUMMARY***', Summary)
+        
+        #terminate the report
+        Report.Terminate()
+        
+        #save short result to as csv file
+        DF_Flags = pd.DataFrame(DF_ResultGroup.OkData & DF_ResultGroup.OkNumberFile).transpose()
+        DF_Flags.index = [DateCheck]
+        DF_Flags.columns = DF_ResultGroup.Group
+        DF_Flags.to_csv(os.path.join(Settings['FolderHTMLReport'], 'Flags.csv'))
     
     logging.shutdown()
 
@@ -270,20 +273,6 @@ def FileName2Date(BaseName):
         DateFile = datetime.strptime(BaseName[0:17], '%Y-%m-%dT%H%M%S') # '2022-07-19T233000_MM2-GL-ZaF-AIU-1915.ghg'
     return DateFile
 
-def ReadIni(FileINI):
-    #load daat from the ini file into the variable Settings
-    global Settings
-    
-    #ini
-    INI = configparser.RawConfigParser()
-    INI.optionxform = str
-    INI.read(FileINI)
-    
-    Settings = {}
-    Settings['FileConfig'] = INI.get('Site', 'FileConfig')
-    Settings['FolderHTMLReport'] = INI.get('Site', 'FolderHTMLReport')
-    Settings['SiteName'] = INI.get('Site', 'SiteName')
-    
 def GetInputArguments():
     #load input parameters, or use default---------------------------------
     parser = argparse.ArgumentParser(description='Process some integers.')
@@ -298,14 +287,11 @@ def GetInputArguments():
 def Init(FileINI, DateCheck):
     global Settings
     
-    VerboseLevel = logging.INFO #usually logging.INFO, for debugging logging.INFO
+    VerboseLevel = logging.INFO #usually logging.INFO, for debugging logging.DEBUG
     
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
     
     ReadIni(FileINI)
-    
-    #normally True, False only for testing, because this is the slowest part
-    Settings['CreateFigures'] = False
     
     Settings['Year'] = DateCheck.strftime('%Y')
     Settings['Month'] = DateCheck.strftime('%m')
@@ -320,7 +306,7 @@ def Init(FileINI, DateCheck):
     logging.basicConfig(level=VerboseLevel,
                         format='%(asctime)s> %(message)s',
                         datefmt='%Y.%m.%d %H:%M:%S',
-                        handlers=[logging.FileHandler(Settings['FolderHTMLReport'] + 'QClog2.txt', mode='w'),
+                        handlers=[logging.FileHandler(os.path.join(Settings['FolderHTMLReport'], 'QClog.txt'), mode='w'),
                                   logging.StreamHandler() ] )
 
     #Import config file
@@ -329,6 +315,22 @@ def Init(FileINI, DateCheck):
     Settings['Config']['ActiveTo'] = Settings['Config'].ActiveTo.dt.date
     Settings['Config']['ActiveFrom'] = Settings['Config'].ActiveFrom.dt.date
 
+def ReadIni(FileINI):
+    #load daat from the ini file into the variable Settings
+    global Settings
+    
+    #ini
+    INI = configparser.RawConfigParser()
+    INI.optionxform = str
+    INI.read(FileINI)
+    
+    Settings = {}
+    Settings['FileConfig'] = INI.get('Site', 'FileConfig')
+    Settings['FolderHTMLReport'] = INI.get('Site', 'FolderHTMLReport')
+    Settings['SiteName'] = INI.get('Site', 'SiteName')
+    #normally True, False only to save time because this is the slowest part
+    Settings['CreateFigures'] = INI.getboolean('Site', 'CreateFigures')
+    
 #Report functions-----------------------------------------------------------------------------------------------------------------------------------
 class ClassReport():
     def __init__(self, ParentFolder, RelativePath, Title, Comment=''):
@@ -742,7 +744,7 @@ def TestDiagnosticByte(DF, DiagnosticChannel):
                         Report.Append('<span style="color: rgb(255,0,0);">', False)
 
                     Report.AppendPopUpLink('Diagnostic error: ', '../diagnostic_description/description.html', BitName[NoBit])
-                    Report.Append('. First error at: ' + DF.Date[PositionFirst].strftime('%d/%m/%Y %H:%M:%S') + '. Last error at: ' + DF.Date[PositionLast].strftime('%d/%m/%Y %H:%M:%S'), True)
+                    Report.Append('. First error at: ' + DF.TIMESTAMP[PositionFirst].strftime('%d/%m/%Y %H:%M:%S') + '. Last error at: ' + DF.TIMESTAMP[PositionLast].strftime('%d/%m/%Y %H:%M:%S'), True)
                     
                     Ok = False
     
@@ -780,7 +782,7 @@ def TestDiagnosticByte2(DF, DiagnosticChannel):
                     Report.Append('<span style="color: rgb(255,0,0);">', False)
                 PercentageBad = (len(Bit) - sum(Bit)) * 100.0 / len(Bit)
                 Report.Append('Diagnostic value 2 (li7700 not synchronised) error (' + str(PercentageBad) + '%). ', False)
-                Report.Append('First error at: ' + DF.Date[PositionFirst].strftime('%d/%m/%Y %H:%M:%S') + '. Last error at: ' + DF.Date[PositionLast].strftime('%d/%m/%Y %H:%M:%S'), True)
+                Report.Append('First error at: ' + DF.TIMESTAMP[PositionFirst].strftime('%d/%m/%Y %H:%M:%S') + '. Last error at: ' + DF.TIMESTAMP[PositionLast].strftime('%d/%m/%Y %H:%M:%S'), True)
 
                 Ok = False
     
@@ -844,7 +846,7 @@ def TestDiagnosticByteCH4(DF):
                         Report.AppendPopUpLink('Diagnostic error: ', '../diagnostic_description/descriptionCH4.html', BitName[NoBit])
                         PercentageBad = (len(Bit) - sum(Bit)) * 100.0 / len(Bit)
                         Report.Append(' (' + str(PercentageBad) + '%). ', False)
-                        Report.Append('First error at: ' + DF.Date[PositionFirst].strftime('%d/%m/%Y %H:%M:%S') + '. Last error at: ' + DF.Date[PositionLast].strftime('%d/%m/%Y %H:%M:%S'), True)
+                        Report.Append('First error at: ' + DF.TIMESTAMP[PositionFirst].strftime('%d/%m/%Y %H:%M:%S') + '. Last error at: ' + DF.TIMESTAMP[PositionLast].strftime('%d/%m/%Y %H:%M:%S'), True)
 
                         Ok = False
     
@@ -889,7 +891,7 @@ def OutputFigures(DF, Header, NameGroup, BaseName, DateCheck, GroupChannels):
             for Index, ChannelShort in enumerate(ChannelsShort):
                 if ChannelShortUnique == ChannelShort:
                     Data = DF.loc[:,Channels[Index]]
-                    logging.info('Generate figure for channel: ' + ChannelShort)
+                    logging.info('Generate figure for channel: ' + Channels[Index])
                     
                     IsNaN = Data.isnull()
                     NbNaN = IsNaN.sum()
@@ -926,9 +928,10 @@ def OutputFigures(DF, Header, NameGroup, BaseName, DateCheck, GroupChannels):
 
 #Main prog------------------------------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
-    DateCheck = date(2022,7,13)
-    FileINI = r'C:\MyDoc\prog\python\ICOS\checkETC\checkETC_ZaF.ini'
-    QC(FileINI, DateCheck)
-    #QC_n(FileINI, date(2022,7,1), date(2022,7,13))
     
-    #ListReports(FileINI)
+    FileINI = r'C:\MyDoc\prog\python\ICOS\checkETC\checkETC_ZaF.ini'
+    DateCheck = date(2021,8,14)
+    #QC(FileINI, DateCheck)
+    #QC_n(FileINI, date(2022,1,1), date(2022,12,31))
+    #QC_n(FileINI, date(2021,1,1), date(2021,12,31))
+    ListReports(FileINI)
