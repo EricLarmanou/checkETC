@@ -19,10 +19,14 @@ The 3 main functions are:
   - FileConfig: path of a csv file listing information for each data file type
   - CreateFigures: bool, to generate or not the plots
 
+- a html template file for the report: ReportEmpty.html
 - a config file (csv), with information per data file type (Warning: editing csv files in excel mess up the double quotes)
 
-
-- a html template file for the report: ReportEmpty.html
+| Group | Process | FolderLocal | Folder | FileMask | FileHeader | Period | NumberFiles | ActiveFrom | ActiveTo | FILE_ID | FILE_LOGGER_ID | FILE_TYPE | FILE_HEAD_NUM | FILE_HEAD_VARS | FILE_EXTENSION | FILE_MISSING_VALUE | FILE_TIMESTAMP | FILE_COMPRESS |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| Met2 | TRUE | C:\MyDoc\data\to_upload\ZaF\corrected_v2\met\<YYYY> | O:\Tech_ICOS\DATA\GL-ZaF\4.delivered\met\<YYYY> | GL-ZaF_BM_<YYYY><MM><DD>_L04_F02.dat | O:\Tech_ICOS\scripts\python\checkETC\headersCriteria\met\GL-ZaF_BMHEADER_202204261956_L04_F02.csv | 20 | 1 | 20220426 |  | 2 | 4 | BM | 0 | 0 | .dat | "NaN" | Quotes |  |
+| EC | TRUE | C:\MyDoc\data\to_upload\ZaF\corrected_v2\EC\<YYYY> | O:\Tech_ICOS\DATA\GL-ZaF\4.delivered\EC\<YYYY> | GL-ZaF_EC_????????????_L01_F01.zip | O:\Tech_ICOS\scripts\python\checkETC\headersCriteria\EC\GL-ZaF_ECHEADER_202107071330_L01_F01.csv | 0.1 | 48 | 20210707 |  | 1 | 1 | EC | 1 | 1 | .csv | -9999 | No quotes | .zip |
+    
 - for each data type, a header file (csv), listing the column names and some criterias
 
 
