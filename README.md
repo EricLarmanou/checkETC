@@ -48,7 +48,6 @@ graph TD;
 | Plot | 0 | 1 |
 
 ## todo:
-- [ ] add range min and max in figures
 - [ ] read Input Arguments
 - [ ] adjust criteria
       
