@@ -5,6 +5,16 @@ The 3 main functions are:
 - ```QC(Site, DateCheck = None)```: perform tests on 1 specific day. A html file (Report.html) is produced. A csv file (Flags.csv) is also produced, with one alert flag per file type. Finally for each data file, a html file containg plots is produced (the plot files generation can be diables in the ini file). All the files are generated at the location specified in the config file (see below).
 - ```QC_n(Site, DateStart, DateEnd)```: perform a test for each day included between the 2 specified dates
 - ```ListReports(Site, Years=None)```: build a summary html report of all the controled days. Generates a html file per year.
+
+```mermaid
+graph TD;
+    report_2022-->report_2022.01.01;
+    report_2022-->report_2022.01.02;
+    report_2022.01.01-->figures_2022.01.01_EC;
+    report_2022.01.01-->figures_2022.01.01_met;
+    report_2022.01.02-->figures_2022.01.02_EC;
+    report_2022.01.02-->figures_2022.01.02_met;
+```
     
 ## Required files:
 - an ini file (checkETC.ini) containg general information for each site:
