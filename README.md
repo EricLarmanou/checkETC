@@ -15,6 +15,29 @@ graph TD;
     report_2022.01.02-->figures_2022.01.02_EC;
     report_2022.01.02-->figures_2022.01.02_met;
 ```
+
+## Command line
+It is possible to call the script with arguments.
+  ```txt
+  usage: checkETC [-h] [-d [DateStart]] [-e [DateEnd]] [-y [YearsReport]] [Site]
+
+Check ETC files. Examples: "checkETC GL-ZaF -d now -y now" or "checkETC GL-ZaF
+-d 2022-01-01 -e 2022-01-31 -y 2022"
+
+positional arguments:
+  Site              name of the site to check must match the section name in
+                    the ini file (for ex. "GL-ZaF").
+
+optional arguments:
+  -h, --help        show this help message and exit
+  -d [DateStart]    Date of the 1st day to check, format yyyy-mm-dd or "now".
+                    If not provided no data file is checked.
+  -e [DateEnd]      Date of the last day to check format yyyy-mm-dd or "now".
+                    If not provided only the data of DateStart is checked.
+  -y [YearsReport]  years used to produce yearly reports, comma-serparated-
+                    list of years or "now". If not provided, no yearly report
+                    is produced.
+  ```
     
 ## Required files:
 - an ini file (checkETC.ini) containg general information for each site:
