@@ -48,7 +48,6 @@ graph TD;
 | Plot | 0 | 1 |
 
 ## todo:
-- [ ] read Input Arguments
 - [ ] adjust criteria
       
       
