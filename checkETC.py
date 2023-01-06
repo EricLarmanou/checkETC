@@ -15,38 +15,58 @@ it requires:
     -a html template file for the report: ReportEmpty.html    
     -for each data type, a header file (csv), listing the column names and some criterias
     
-todo: add range min and max in figures
-      read Input Arguments
+todo: read Input Arguments
+      adjust crteria
 """
 
-from zipfile import ZipFile
-import pandas as pd
-import copy
-from glob import glob
-from datetime import datetime, timedelta, date
 import os
+from glob import glob
+import copy
+from zipfile import ZipFile
 import socket
-import numpy as np
-import argparse # for CLI arguments
+import argparse # CLI arguments
 import logging
-import configparser
+import configparser #read INI files
 
-#plotting library
+import pandas as pd
+from datetime import datetime, timedelta, date
+import numpy as np
+
 import plotly.graph_objects as go
 import plotly.io as pio
 
 pio.templates.default = pio.templates["plotly_dark"]
 
-def ListReports(FileINI, Years=None):
-    #Produce a html report listing all the daily reports
+VerboseLevel = logging.INFO #usually logging.INFO, for debugging logging.DEBUG
+
+def ListReports(Site, Years=None):
+    #Produce a html report per year listing all the daily reports
+    #if Years is provided, process the years listed, otherwise process all years present in the report folder
     
-    ReadIni(FileINI)
+    ReadIni(Site)
     
     FolderHome = Settings['FolderHTMLReport'].split('<')[0]
-    FoldersYear = sorted(glob(FolderHome + '*\\'))
+    if not os.path.exists(FolderHome):
+        os.makedirs(FolderHome)
+        
+    #init log file
+    logging.basicConfig(level=VerboseLevel,
+                        format='%(asctime)s> %(message)s',
+                        datefmt='%Y.%m.%d %H:%M:%S',
+                        handlers=[logging.FileHandler(os.path.join(FolderHome, 'ListLog.txt'), mode='w'),
+                                  logging.StreamHandler() ] )
+        
+    if Years is None:
+        #list year folders
+        FoldersYear = sorted(glob(FolderHome + '*\\'))
+    else:
+        if not isinstance(Years, list):
+            Years = [Years]
+        FoldersYear = [os.path.join(FolderHome , str(Year)) for Year in Years]
     for FolderYear in FoldersYear:
         Year = os.path.basename(os.path.normpath(FolderYear))
-        FoldersDay = sorted(glob(FolderYear + '*\\'))
+        #list day folders
+        FoldersDay = sorted(glob(os.path.join(FolderYear, '*\\')))
         DF_Result = pd.DataFrame()
         for FolderDay in FoldersDay:
             FileReport = os.path.join(FolderDay, 'Report.html')
@@ -56,37 +76,36 @@ def ListReports(FileINI, Years=None):
                 DF_Flag.index = ['<a href="' + FileReport.replace(FolderHome, '') + '">' + DF_Flag.index + '</a>']
                 DF_Result = pd.concat([DF_Result, DF_Flag])
                 
-        Report = ClassReport(FolderHome, Year + '.html', Settings['SiteName'] + ' ' + Year, '') #HTML report object
+        Report = ClassReport(FolderHome, Year + '.html', Settings['Site'] + ' ' + Year, '') #HTML report object
         
-        #add summary table of files
+        #add table of files
         Style = DF_Result.style.format(na_rep='')
         Style.applymap(ColorBool)
         Style.set_table_styles([{'selector': '*', 'props': [('border','1px solid beige')]}])
-        #Style.hide(axis="index")
         Report.Append(Style.to_html(render_links=True))
         Report.Terminate()
 
-def QC_n(FileINI, DateStart, DateEnd):
+def QC_n(Site, DateStart, DateEnd):
     for DateQC in [DateStart + timedelta(days=x) for x in range((DateEnd-DateStart).days)]:
-        QC(FileINI, DateQC)
+        QC(Site, DateQC)
 
-def QC(FileINI, DateCheck = None):
+def QC(Site, DateCheck = None):
     #Main function to call to perform QC
-    #FileINI: path of the ini file
-    ##date to QC. If no date specified, today is used
+    #DateCheck: date to QC. If no date specified, today is used
     
     global Settings, Report
     
     if DateCheck == None:
         DateCheck = date.today()
 
-    Init(FileINI, DateCheck)
-    Report = ClassReport(Settings['FolderHTMLReport'], 'Report.html', Settings['SiteName'] + ' ' + DateCheck.strftime('%Y-%m-%d'), '') #HTML report object
+    Init(Site, DateCheck)
+    Report = ClassReport(Settings['FolderHTMLReport'], 'Report.html', Settings['Site'] + ' ' + DateCheck.strftime('%Y-%m-%d'), '') #HTML report object
     Report.Append('<h2>Summary</h2>', False)
     Report.Append('***SUMMARY***', False)
     DF_ResultGroup = pd.DataFrame() #result table per group
     DF_Result = pd.DataFrame() #result table per file
 
+    NumberFilesTotal = 0
     for NameGroup, Group in Settings['Config'].iterrows(): #loop through data groups
         #check if we should process it based on Process flag, and Active dates of the group
         if Group['Process'] and (Group['ActiveFrom']<=DateCheck) and (pd.isnull(Group['ActiveTo']) or (DateCheck<=Group['ActiveTo'])):
@@ -113,6 +132,7 @@ def QC(FileINI, DateCheck = None):
             
             #check the number of files
             NumberFiles = len(Files)
+            NumberFilesTotal += NumberFiles
             OkNbFiles = NumberFiles == Group['NumberFiles']
             if OkNbFiles:
                 Report.Append('<h2>' + NameGroup + ': detected files: ' + '<span style="color: rgb(0,255,0);">' + str(NumberFiles) + '/' + str(Group['NumberFiles']) + '</span>' + '</h2>', False) #show numbers in green
@@ -173,7 +193,14 @@ def QC(FileINI, DateCheck = None):
                                         pd.DataFrame({'Group':NameGroup, 'OkNumberFile':OkNbFiles, 'NumberFile':str(NumberFiles) + '/' + str(Group['NumberFiles']), 'OkData': OkData}, index=[NameGroup]).astype(object)], 
                                         ignore_index=True)
     
-    if not DF_ResultGroup.empty:
+    logging.shutdown()
+    
+    if NumberFilesTotal == 0:
+        filelist = glob(os.path.join(Settings['FolderHTMLReport'], '*'))
+        for f in filelist:
+            os.remove(f)
+        os.rmdir(Settings['FolderHTMLReport'])
+    elif not DF_ResultGroup.empty:
         #add summary table of groups
         Style = DF_ResultGroup.loc[:,['Group','OkNumberFile','NumberFile','OkData']].style.format(na_rep='')
         Style.applymap(ColorBool, subset=DF_ResultGroup.columns[DF_ResultGroup.dtypes==object])
@@ -198,8 +225,6 @@ def QC(FileINI, DateCheck = None):
         DF_Flags.index = [DateCheck]
         DF_Flags.columns = DF_ResultGroup.Group
         DF_Flags.to_csv(os.path.join(Settings['FolderHTMLReport'], 'Flags.csv'))
-    
-    logging.shutdown()
 
 def LoadFile(Group, File, Header):
     Columns = Header.columns
@@ -275,23 +300,44 @@ def FileName2Date(BaseName):
 
 def GetInputArguments():
     #load input parameters, or use default---------------------------------
-    parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument(dest='ListINI', metavar='S', type=str, nargs='?', help='name of the site, used to build the data path, and ini file name.')
-    
-    args = parser.parse_args()
-    if args.ListINI is None:
-        raise Exception('SiteName argument is not optional.')
-    
-    return args.ListINI.split(',')
+    parser = argparse.ArgumentParser(prog='checkETC', description='Check ETC files. Examples: "checkETC.py GL-ZaF -d now -y now" or "checkETC.py GL-ZaF -d 2022-01-01 -e 2022-01-31 -y 2022"')
+    parser.add_argument('Site', type=str, nargs='?', help='name of the site to check must match the section name in the ini file (for ex. "GL-ZaF").')
+    parser.add_argument('-d', dest='DateStart', metavar='DateStart', type=str, nargs='?', help='Date of the 1st day to check, format yyyy-mm-dd or "now". If not provided no data file is checked.')
+    parser.add_argument('-e', dest='DateEnd', metavar='DateEnd', type=str, nargs='?', help='Date of the last day to check format yyyy-mm-dd or "now". If not provided only the data of DateStart is checked.')
+    parser.add_argument('-y', dest='YearsReport', metavar='YearsReport', type=str, nargs='?', help='years used to produce yearly reports, comma-serparated-list of years or "now". If not provided, no yearly report is produced.')
 
-def Init(FileINI, DateCheck):
-    global Settings
+    args = parser.parse_args()
+    Site =  args.Site
     
-    VerboseLevel = logging.INFO #usually logging.INFO, for debugging logging.DEBUG
+    if args.DateStart is None:
+        DateStart = None
+    elif args.DateStart.lower() == "now":
+        DateStart = date.today()
+    else:
+        DateStart = datetime.strptime(args.DateStart, '%Y-%m-%d').date()
+        
+    if args.DateEnd is None:
+        DateEnd = None
+    elif args.DateEnd.lower() == "now":
+        DateEnd = date.today()
+    else:
+        DateEnd = datetime.strptime(args.DateEnd, '%Y-%m-%d').date()
+    
+    if args.YearsReport is None:
+        YearsReport = None
+    elif args.YearsReport.lower() == "now":
+        YearsReport = date.today().year
+    else:
+        YearsReport = [int(x) for x in args.YearsReport.split(',')]
+    
+    return Site, DateStart, DateEnd, YearsReport
+
+def Init(Site, DateCheck):
+    global Settings
     
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
     
-    ReadIni(FileINI)
+    ReadIni(Site)
     
     Settings['Year'] = DateCheck.strftime('%Y')
     Settings['Month'] = DateCheck.strftime('%m')
@@ -301,6 +347,11 @@ def Init(FileINI, DateCheck):
     Settings['FolderHTMLReport'] = Settings['FolderHTMLReport'].replace('<YYYY>', Settings['Year']).replace('<MM>', Settings['Month']).replace('<DD>', Settings['Day'])
     if not os.path.exists(Settings['FolderHTMLReport']):
         os.makedirs(Settings['FolderHTMLReport'])
+    else:
+        filelist = glob(os.path.join(Settings['FolderHTMLReport'], '*'))
+        for f in filelist:
+            os.remove(f)
+            os.rmdir(Settings['FolderHTMLReport'])
     
     #init log file
     logging.basicConfig(level=VerboseLevel,
@@ -315,34 +366,32 @@ def Init(FileINI, DateCheck):
     Settings['Config']['ActiveTo'] = Settings['Config'].ActiveTo.dt.date
     Settings['Config']['ActiveFrom'] = Settings['Config'].ActiveFrom.dt.date
 
-def ReadIni(FileINI):
+def ReadIni(Site):
     #load daat from the ini file into the variable Settings
-    global Settings
+    global Settings, INI
     
     #ini
-    INI = configparser.RawConfigParser()
-    INI.optionxform = str
-    INI.read(FileINI)
+    if not 'INI' in globals():
+        INI = configparser.RawConfigParser()
+        INI.optionxform = str
+        INI.read('checkETC.ini')
     
-    Settings = {}
-    Settings['FileConfig'] = INI.get('Site', 'FileConfig')
-    Settings['FolderHTMLReport'] = INI.get('Site', 'FolderHTMLReport')
-    Settings['SiteName'] = INI.get('Site', 'SiteName')
+    Settings = {'Site': Site}
+    Settings['FileConfig'] = INI.get(Site, 'FileConfig')
+    Settings['FolderHTMLReport'] = INI.get(Site, 'FolderHTMLReport')
     #normally True, False only to save time because this is the slowest part
-    Settings['CreateFigures'] = INI.getboolean('Site', 'CreateFigures')
+    Settings['CreateFigures'] = INI.getboolean(Site, 'CreateFigures')
     
 #Report functions-----------------------------------------------------------------------------------------------------------------------------------
 class ClassReport():
     def __init__(self, ParentFolder, RelativePath, Title, Comment=''):
-        global Settings
-        
         #Load model report file
         fid = open('ReportEmpty.html', 'rt')
-        self.ReplaceStringTitle = '***Add title here***'
-        self.ReplaceStringBody = '***Add body here***'
         self.Model = fid.read()
         fid.close()
-        
+        self.ReplaceStringTitle = '***Add title here***'
+        self.ReplaceStringBody = '***Add body here***'
+
         logging.info('Generating report ' + Title + '...')
         
         self.File = os.path.join(ParentFolder, RelativePath)
@@ -872,7 +921,7 @@ def OutputFigures(DF, Header, NameGroup, BaseName, DateCheck, GroupChannels):
     if Settings['CreateFigures']: #normaly True, False only for testing, because this is the slowest part
         logging.info('Create png figures')
         #HTML report object
-        ReportFigure = ClassReport(Settings['FolderHTMLReport'], NameGroup + '_' + BaseName + '.html', Settings['SiteName'] + ' ' + DateCheck.strftime('%Y-%m-%d') + ' ' + NameGroup , 'File ' + BaseName + '. ')
+        ReportFigure = ClassReport(Settings['FolderHTMLReport'], NameGroup + '_' + BaseName + '.html', Settings['Site'] + ' ' + DateCheck.strftime('%Y-%m-%d') + ' ' + NameGroup , 'File ' + BaseName + '. ')
         
         #to not load JS for each figure, but only for the first
         FirstPlot = 'cdn'
@@ -888,6 +937,8 @@ def OutputFigures(DF, Header, NameGroup, BaseName, DateCheck, GroupChannels):
         for ChannelShortUnique in pd.unique(ChannelsShort):
             #init the figure
             fig = go.Figure()
+            PlotMin = True
+            PlotMax = True
             for Index, ChannelShort in enumerate(ChannelsShort):
                 if ChannelShortUnique == ChannelShort:
                     Data = DF.loc[:,Channels[Index]]
@@ -900,9 +951,18 @@ def OutputFigures(DF, Header, NameGroup, BaseName, DateCheck, GroupChannels):
                     IsOk = ~ IsNaN
                     DateOk = DF.loc[IsOk,'TIMESTAMP']
                     DataOk = Data.loc[IsOk]
-
+                    
+                    #plot min & max thresholds if some values are out of range
+                    [Min, Max] = Header.loc[['Min', 'Max'], Channels[Index]]
+                    if (not np.isnan(Min)) and PlotMin and any(DataOk<Min):
+                        fig.add_trace(go.Scatter(x=DateOk.iloc[[0, -1]], y=[Min,Min], mode='lines', name = 'Min', line=dict(dash='dash')))
+                        PlotMin = False
+                    if (not np.isnan(Max)) and PlotMax and any(DataOk>Max):
+                        fig.add_trace(go.Scatter(x=DateOk.iloc[[0, -1]], y=[Max,Max], mode='lines', name = 'Max', line=dict(dash='dash')))
+                        PlotMax = False
+                    
                     #plot data
-                    if len(DataOk)>0:
+                    if len(DataOk) > 0:
                         fig.add_trace(go.Scatter(x=DateOk, y=DataOk, mode='lines', name = Channels[Index]))
                     
                     #plot NaN
@@ -928,10 +988,21 @@ def OutputFigures(DF, Header, NameGroup, BaseName, DateCheck, GroupChannels):
 
 #Main prog------------------------------------------------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
+    Site, DateStart, DateEnd, YearsReport = GetInputArguments()
+    #Site, DateStart, DateEnd, YearsReport = None, None, None, None
     
-    FileINI = r'C:\MyDoc\prog\python\ICOS\checkETC\checkETC_ZaF.ini'
-    DateCheck = date(2021,8,14)
-    #QC(FileINI, DateCheck)
-    #QC_n(FileINI, date(2022,1,1), date(2022,12,31))
-    #QC_n(FileINI, date(2021,1,1), date(2021,12,31))
-    ListReports(FileINI)
+    if not DateStart is None:
+        if DateEnd is None:
+            QC(Site, DateStart)
+        else:
+            QC_n(Site, DateStart, DateEnd)
+            
+    if not YearsReport is None:
+        ListReports(Site,YearsReport)
+    
+    #Site = 'GL-ZaF-L'
+    #DateStart = date(2021,8,14)
+    #QC_n(Site, date(2022,1,1), date(2022,1,31))
+    #QC_n(Site, date(2022,1,1), date(2022,12,31))
+    #QC_n(Site, date(2021,1,1), date(2021,12,31))
+    #ListReports(Site,2022)
