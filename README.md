@@ -71,6 +71,4 @@ optional arguments:
 | Plot | 0 | 1 |
 
 ## todo:
-- [ ] adjust criteria
-      
-      
+- [ ] zip text report and email it
