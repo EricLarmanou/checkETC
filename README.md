@@ -4,9 +4,9 @@ checkETC is a tool for testing biomet and eddy covariance data files. The compat
 The 3 main functions are:
 - ```QC(Site, DateCheck = None)```: perform tests on 1 specific day. A html file (Report.html) is produced. A csv file (Flags.csv) is also produced, with one alert flag per file type. Finally for each data file, a html file containg plots is produced (the plot files generation can be diables in the ini file). All the files are generated at the location specified in the config file (see below).
 - ```QC_n(Site, DateStart, DateEnd)```: perform a test for each day included between the 2 specified dates
-- ```ListReports(Site, Years=None)```: build a summary html report of all the controled days. Generates a html file per year.
+- ```ListReports(Site, Years=None)```: build a yearly html report.
 
-The 3 levels of reports: level 1: yearly / level 2: daily, level 3: per logger
+The 3 levels of reports: level 1: yearly / level 2: daily, level 3: per data file
 
 ```mermaid
 graph TD;
