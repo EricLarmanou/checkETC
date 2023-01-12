@@ -6,6 +6,8 @@ The 3 main functions are:
 - ```QC_n(Site, DateStart, DateEnd)```: perform a test for each day included between the 2 specified dates
 - ```ListReports(Site, Years=None)```: build a summary html report of all the controled days. Generates a html file per year.
 
+The 3 levels of reports: level 1: yearly / level 2: daily, level 3: per logger
+
 ```mermaid
 graph TD;
     report_2022-->report_2022.01.01;
@@ -48,7 +50,7 @@ optional arguments:
   CreateFigures=TRUE
   ```
   Where:
-  - FolderHTMLReport: path of the folder where html report files are generated. If \<YYYY\>, \<MM\>, \<DD\> strings are used, the date of the file being tested is used to build the path
+  - FolderHTMLReport: path of the folder where html reports are generated. If \<YYYY\>, \<MM\>, \<DD\> strings are used, the date of the file being tested is used to build the path
   - FileConfig: path of a csv file listing information for each data file type
   - CreateFigures: bool, to generate or not the plots
 
