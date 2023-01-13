@@ -62,15 +62,14 @@ optional arguments:
 | Met2 | TRUE | O:\Tech_ICOS\DATA\GL-ZaF\4.delivered\met\<YYYY> | GL-ZaF_BM_<YYYY><MM><DD>_L04_F02.dat | O:\Tech_ICOS\scripts\python\checkETC\headersCriteria\met\GL-ZaF_BMHEADER_202204261956_L04_F02.csv | 20 | 1 | 20220426 |  | 2 | 4 | BM | 0 | 0 | .dat | "NaN" | Quotes |  |
 | EC | TRUE | O:\Tech_ICOS\DATA\GL-ZaF\4.delivered\EC\<YYYY> | GL-ZaF_EC_????????????_L01_F01.zip | O:\Tech_ICOS\scripts\python\checkETC\headersCriteria\EC\GL-ZaF_ECHEADER_202107071330_L01_F01.csv | 0.1 | 48 | 20210707 |  | 1 | 1 | EC | 1 | 1 | .csv | -9999 | No quotes | .zip |
     
-- for each data type, a header file (csv), listing the column names and some criterias
+- for each data type, a header file (csv), listing the column names and some criterias. "Process" determines if the variable is QC. "Group" is a free text field used to group multiple variables in the same figure. If it is NaN, the variable is not plotted.
 
-
-| Variable | TIMESTAMP | D_SNOW_1_1_1 |
-| ------------- | ------------- | ------------- |
-| Min | NaN | -0.5 |
-| Max | NaN | -2 |
-| Process | 0 | 1 |
-| Plot | 0 | 1 |
+| Variable | Min | Max | Process | Group |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| TIMESTAMP | NaN | NaN | 0 | NaN |
+| G_1_1_1 | -50 | 200 | 1 | G |
+| G_2_1_1 | -50 | 200 | 1 | G |
+| WTD_1_1_1 | -0.2 | 0.2 | 1 | WTD |
 
 ## todo:
 - [ ] zip text report and email it
