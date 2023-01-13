@@ -1,0 +1,9 @@
+Variable,Min,Max,Process,Group
+TIMESTAMP,NaN,NaN,0,NaN
+TA_2_1_1,-40,40,1,TA
+PA_2_1_1,80,120,1,PA
+RH_2_1_1,1,105,1,RH
+SW_IN_2_1_1,-20,1500,1,SW_IN
+P_3_1_1,0,10,1,P
+WS_2_1_1,0,50,1,WS
+WD_2_1_1,0,360,1,WD
