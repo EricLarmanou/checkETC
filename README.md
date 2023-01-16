@@ -40,6 +40,12 @@ optional arguments:
                     list of years or "now". If not provided, no yearly report
                     is produced.
   ```
+  
+Here is example batch file, activating Anaconda, that can be run daily, for example with the Windows Task Scheduler: 
+```bat
+call C:\ProgramData\Anaconda3\condabin\conda activate
+python D:\checkETC.py GL-ZaF -d now -y now
+```
     
 ## Required files:
 - an ini file (```checkETC.ini```) containg general information for each site:
