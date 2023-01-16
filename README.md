@@ -2,7 +2,7 @@
 checkETC is a python script for testing biomet and eddy covariance data files. The compatiblity of the file with ETC requirements is tested as well as unrealitic values, gaps, NaNs...
 
 The 3 main functions are:
-- ```QC(Site, DateCheck = None)```: perform tests on 1 specific day. A html file (Report.html) is produced. A csv file (Flags.csv) is also produced, with one alert flag per file type. Finally for each data file, a html file containg plots is produced (the plot files generation can be diables in the ini file). All the files are generated at the location specified in the config file (see below).
+- ```py QC(Site, DateCheck = None)```: perform tests on 1 specific day. A html file (Report.html) is produced. A csv file (Flags.csv) is also produced, with one alert flag per file type. Finally for each data file, a html file containg plots is produced (the plot files generation can be diables in the ini file). All the files are generated at the location specified in the config file (see below).
 - ```QC_n(Site, DateStart, DateEnd)```: perform a test for each day included between the 2 specified dates
 - ```ListReports(Site, Years=None)```: build a yearly html report.
 
@@ -42,19 +42,19 @@ optional arguments:
   ```
     
 ## Required files:
-- an ini file (checkETC.ini) containg general information for each site:
+- an ini file (```checkETC.ini```) containg general information for each site:
   ```ini
   [GL-ZaF]
-  FolderHTMLReport=O:\Tech_ICOS\DATA\GL-ZaF\3.processed\reports\<YYYY>\<MM>.<DD>
-  FileConfig=O:\Tech_ICOS\scripts\python\checkETC\checkETC_ZaF.csv
+  FolderHTMLReport=D:\DATA\reports\<YYYY>\<MM>.<DD>
+  FileConfig=D:\checkETC_ZaF.csv
   CreateFigures=TRUE
   ```
   Where:
-  - FolderHTMLReport: path of the folder where html reports are generated. If \<YYYY\>, \<MM\>, \<DD\> strings are used, the date of the file being tested is used to build the path
-  - FileConfig: path of a csv file listing information for each data file type
-  - CreateFigures: bool, to generate or not the plots
+  - ```FolderHTMLReport```: path of the folder where html reports are generated. If \<YYYY\>, \<MM\>, \<DD\> strings are used, the date of the file being tested is used to build the path
+  - ```FileConfig```: path of a csv file listing information for each data file type
+  - ```CreateFigures```: bool, to generate or not the plots
 
-- a html template file for the report: ReportEmpty.html
+- a html template file for the report: ```ReportTemplate.html```. It can be customized as long as the strings ```***Add title here***``` and ```***Add body here***``` are present.
 - a config file (csv), with information per data file type, mostly similar to what is stored in the BADM database (Warning: editing a csv files in excel mess up the double quotes)
 
 | Group | Process | Folder | FileMask | FileHeader | Period | NumberFiles | ActiveFrom | ActiveTo | FILE_ID | FILE_LOGGER_ID | FILE_TYPE | FILE_HEAD_NUM | FILE_HEAD_VARS | FILE_EXTENSION | FILE_MISSING_VALUE | FILE_TIMESTAMP | FILE_COMPRESS |
@@ -62,7 +62,7 @@ optional arguments:
 | Met2 | TRUE | D:\DATA\met\<YYYY> | GL-ZaF_BM_<YYYY><MM><DD>_L04_F02.dat | D:\headersCriteria\met\GL-ZaF_BMHEADER_202204261956_L04_F02.csv | 20 | 1 | 20220426 |  | 2 | 4 | BM | 0 | 0 | .dat | "NaN" | Quotes |  |
 | EC | TRUE | D:\DATA\\EC\<YYYY> | GL-ZaF_EC_????????????_L01_F01.zip | D:\headersCriteria\EC\GL-ZaF_ECHEADER_202107071330_L01_F01.csv | 0.1 | 48 | 20210707 |  | 1 | 1 | EC | 1 | 1 | .csv | -9999 | No quotes | .zip |
     
-- for each data type, a header file (csv), listing the column names and some criterias. "Process" determines if the variable is tested for NaNs and out of range. Min and Max can be set to NaN so skip the Min or Max out of range test. "Group" is a free text field used to group multiple variables in the same figure. If it is NaN, the variable is not plotted.
+- for each data type, a header file (csv), listing the column names and some criterias. ```Process``` determines if the variable is tested for numeric values, NaNs and out of range values. ```Min``` and ```Max``` can be set to NaN so skip the Min or Max out of range test. ```Group``` is a free text field used to group multiple variables in the same figure. If it is NaN, the variable is not plotted.
 
 | Variable | Min | Max | Process | Group |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
