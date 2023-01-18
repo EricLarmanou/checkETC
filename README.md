@@ -77,3 +77,6 @@ python D:\checkETC.py GL-ZaF -d now -y now
 | G_1_1_1 | -50 | 200 | 1 | G |
 | G_2_1_1 | -50 | 200 | 1 | G |
 | WTD_1_1_1 | -0.2 | 0.2 | 1 | WTD |
+
+## Website
+If the report files are used for a website, fhe folder ```website``` contains the main html file (```index.html```), that redirects to the annual report of the present year.
