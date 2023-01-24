@@ -54,12 +54,14 @@ python D:\checkETC.py GL-ZaF -d now -y now
   [GL-ZaF]
   FolderHTMLReport=D:\DATA\reports\<YYYY>\<MM>.<DD>
   FileConfig=D:\checkETC_ZaF.csv
-  CreateFigures=TRUE
+  CreateFigures=True
+  Zip=False
   ```
   Where:
   - ```FolderHTMLReport```: path of the folder where html reports are generated. If \<YYYY\>, \<MM\>, \<DD\> strings are used, the date of the file being tested is used to build the path
   - ```FileConfig```: path of a csv file listing information for each data file type
   - ```CreateFigures```: bool, to generate or not the plots
+  - ```Zip```: bool, to zip the daily html report file
 
 - a html template file for the report: ```ReportTemplate.html```. It can be customized as long as the strings ```***Add title here***``` and ```***Add body here***``` are present.
 - a config file (csv), with information per data file type, mostly similar to what is stored in the BADM database (Warning: editing a csv files in excel mess up the double quotes)
