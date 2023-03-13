@@ -1,13 +1,14 @@
 # checkETC
 checkETC is a python script for testing biomet and eddy covariance data files. The compatiblity of the file with ETC requirements is tested as well as unrealitic values, gaps, NaNs...
+
 Required libraries: pandas, plotly
 
 The 3 main functions are:
-- ```py QC(Site, DateCheck = None)```: perform tests on 1 specific day. A html file (Report.html) is produced. A csv file (Flags.csv) is also produced, with one alert flag per file type. Finally for each data file, a html file containg plots is produced (the plot files generation can be diables in the ini file). All the files are generated at the location specified in the config file (see below).
-- ```QC_n(Site, DateStart, DateEnd)```: perform a test for each day included between the 2 specified dates
-- ```ListReports(Site, Years=None)```: build a yearly html report.
+- ```py QC(Site, DateCheck = None)```: perform tests on 1 specific day. A html file (Report.html) is produced for that day. A csv file (Flags.csv) is also produced, with a single flag per file type. Finally for each data file, a html file containg plots is produced (the plot generation can be diabled in the ini file). All the files are generated in a generated directory named after the date of the processed day, at the location specified in the config file (see below).
+- ```QC_n(Site, DateStart, DateEnd)```: perform a test for all days included in the specified range.
+- ```ListReports(Site, Years=None)```: build a yearly html report, listing flags previously saved in the daily csv files.
 
-The 3 levels of reports: level 1: yearly / level 2: daily, level 3: per data file
+The 3 levels of reports: level 1: yearly / level 2: daily, level 3: daily and per file type
 
 ```mermaid
 graph TD;
