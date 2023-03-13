@@ -4,8 +4,8 @@ checkETC is a python script for testing biomet and eddy covariance data files. T
 Required libraries: pandas, plotly
 
 The 3 main functions are:
-- ```py QC(Site, DateCheck = None)```: perform tests on 1 specific day. A html file (Report.html) is produced for that day. A csv file (Flags.csv) is also produced, with a single flag per file type. Finally for each data file, a html file containg plots is produced (the plot generation can be diabled in the ini file). All the files are generated in a generated directory named after the date of the processed day, at the location specified in the config file (see below).
-- ```QC_n(Site, DateStart, DateEnd)```: perform a test for all days included in the specified range.
+- ```py QC(Site, DateCheck = None)```: perform tests on 1 specific day. A html file (Report.html) is produced for that day. A csv file (Flags.csv) is also produced, with a single flag per file type. Optionally, for each data file a html file containg plots is produced. All the files are generated in a directory named after the date of the processed day, at the location specified in the config file (see below).
+- ```QC_n(Site, DateStart, DateEnd)```: perform a test for all days within the specified range, including DateStart and DateEnd.
 - ```ListReports(Site, Years=None)```: build a yearly html report, listing flags previously saved in the daily csv files.
 
 The 3 levels of reports: level 1: yearly / level 2: daily, level 3: daily and per file type
@@ -59,13 +59,19 @@ python D:\checkETC.py GL-ZaF -d now -y now
   Zip=False
   ```
   Where:
-  - ```FolderHTMLReport```: path of the folder where html reports are generated. If \<YYYY\>, \<MM\>, \<DD\> strings are used, the date of the file being tested is used to build the path
-  - ```FileConfig```: path of a csv file listing information for each data file type
-  - ```CreateFigures```: bool, to generate or not the plots
-  - ```Zip```: bool, to zip the daily html report file
+  - ```["Site"]```: The section name is a unique string refering to the site. This name is the ```Site``` argument for processing functions.
+  - ```FolderHTMLReport```: path of the folder where html reports are generated. If \<YYYY\>, \<MM\>, \<DD\> strings are used, the date of the file being tested is used to build the path.
+  - ```FileConfig```: path of a csv file containing information for each data file type.
+  - ```CreateFigures```: bool, to generate or not the plots (mostly for speeding up processing during tests).
+  - ```Zip```: bool, to zip the daily html report file.
 
 - a html template file for the report: ```ReportTemplate.html```. It can be customized as long as the strings ```***Add title here***``` and ```***Add body here***``` are present.
-- a config file (csv), with information per data file type, mostly similar to what is stored in the BADM database (Warning: editing a csv files in excel mess up the double quotes)
+- a config file (csv), with information per data file type (Warning: editing a csv files in excel mess up the double quotes):
+  - ```Group```: Unique string refering to the data type (met, soil, EC...)
+  - ```Process```: Boolean defining is the ```Group``` should be processed
+  - ```Folder```: data files location. If \<YYYY\>, \<MM\>, \<DD\> strings are used, the date of the file being tested is used to build the path.
+  - ```FileMask```: data files mask. If \<YYYY\>, \<MM\>, \<DD\> strings are used, the date of the file being tested is used to build the path.
+  - other columns: aggregatied information retrieved from the BADM database
 
 | Group | Process | Folder | FileMask | FileHeader | Period | NumberFiles | ActiveFrom | ActiveTo | FILE_ID | FILE_LOGGER_ID | FILE_TYPE | FILE_HEAD_NUM | FILE_HEAD_VARS | FILE_EXTENSION | FILE_MISSING_VALUE | FILE_TIMESTAMP | FILE_COMPRESS |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
