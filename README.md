@@ -60,7 +60,7 @@ python D:\checkETC.py GL-ZaF -d now -y now
   ```
   Where:
   - ```["Site"]```: The section name is a unique string refering to the site. This name is the ```Site``` argument for processing functions.
-  - ```FolderHTMLReport```: path of the folder where html reports are generated. If \<YYYY\>, \<MM\>, \<DD\> strings are used, the date of the file being tested is used to build the path.
+  - ```FolderHTMLReport```: path of the folder where html reports are generated. Strings ```<YYYY>```, ```<MM>```, ```<DD>``` are replaced by the year, month and day of the date of the file being tested. ```?``` is a jocker character.
   - ```FileConfig```: path of a csv file containing information for each data file type.
   - ```CreateFigures```: bool, to generate or not the plots (mostly for speeding up processing during tests).
   - ```Zip```: bool, to zip the daily html report file.
@@ -69,16 +69,19 @@ python D:\checkETC.py GL-ZaF -d now -y now
 - a config file (csv), with information per data file type (warning: editing a csv files in excel mess up the double quotes):
   - ```Group```: Unique string refering to the data type (met, soil, EC...)
   - ```Process```: Boolean defining is the ```Group``` should be processed
-  - ```Folder```: data files location. If ```<YYYY>```, ```<MM>```, ```<DD>``` strings are replaced by the year, month and day of the date of the file being tested. ```?``` is a jocker character.
-  - ```FileMask```: data files mask. If \<YYYY\>, \<MM\>, \<DD\> strings are used, the date of the file being tested is used to build the path.
-  - other columns: aggregatied information retrieved from the BADM database
+  - ```Folder```: data files location. Strings ```<YYYY>```, ```<MM>```, ```<DD>``` are replaced by the year, month and day of the date of the file being tested. ```?``` is a jocker character.
+  - ```FileMask```: data files mask. Strings ```<YYYY>```, ```<MM>```, ```<DD>``` are replaced by the year, month and day of the date of the file being tested. ```?``` is a jocker character.
+  - other columns: aggregatied information retrieved from the BADM database.
 
 | Group | Process | Folder | FileMask | FileHeader | Period | NumberFiles | ActiveFrom | ActiveTo | FILE_ID | FILE_LOGGER_ID | FILE_TYPE | FILE_HEAD_NUM | FILE_HEAD_VARS | FILE_EXTENSION | FILE_MISSING_VALUE | FILE_TIMESTAMP | FILE_COMPRESS |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
 | Met | TRUE | D:\DATA\met\<YYYY> | GL-ZaF_BM_<YYYY><MM><DD>_L04_F02.dat | D:\headersCriteria\met\GL-ZaF_BMHEADER_202204261956_L04_F02.csv | 20 | 1 | 20220426 |  | 2 | 4 | BM | 0 | 0 | .dat | "NaN" | Quotes |  |
 | EC | TRUE | D:\DATA\\EC\<YYYY> | GL-ZaF_EC_????????????_L01_F01.zip | D:\headersCriteria\EC\GL-ZaF_ECHEADER_202107071330_L01_F01.csv | 0.1 | 48 | 20210707 |  | 1 | 1 | EC | 1 | 1 | .csv | -9999 | No quotes | .zip |
     
-- for each data type, a header file (csv), listing the column names and some criterias. ```Process``` determines if the variable is tested for numeric values, NaNs and out of range values. ```Min``` and ```Max``` can be set to NaN to skip the min- or max- out of range tests. ```Group``` is a free text field used to group multiple variables in the same figure. If ```Group``` is NaN, the variable is not plotted.
+- for each data type, a header file (csv), listing the column names and some criterias:
+  -  ```Min``` and ```Max``` <re used to test if values are out of range. If set to NaN the test is not performed.
+  - ```Process``` determines if the variable is tested for numeric values, NaNs and out of range values.
+  - ```Group``` is a free string field used to group multiple variables in the same figure. If ```Group``` is NaN, the variable is not plotted.
 
 | Variable | Min | Max | Process | Group |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
@@ -88,4 +91,4 @@ python D:\checkETC.py GL-ZaF -d now -y now
 | WTD_1_1_1 | -0.2 | 0.2 | 1 | WTD |
 
 ## Website
-If the report files are served by a webserver, the folder ```website``` contains the main html file (```index.html```), that redirects to the annual report of the present year.
+The html file ```website/index.html``` redirects to the annual report of the present year.
