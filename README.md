@@ -66,10 +66,10 @@ python D:\checkETC.py GL-ZaF -d now -y now
   - ```Zip```: bool, to zip the daily html report file.
 
 - a html template file for the report: ```ReportTemplate.html```. It can be customized as long as the strings ```***Add title here***``` and ```***Add body here***``` are present.
-- a config file (csv), with information per data file type (Warning: editing a csv files in excel mess up the double quotes):
+- a config file (csv), with information per data file type (warning: editing a csv files in excel mess up the double quotes):
   - ```Group```: Unique string refering to the data type (met, soil, EC...)
   - ```Process```: Boolean defining is the ```Group``` should be processed
-  - ```Folder```: data files location. If \<YYYY\>, \<MM\>, \<DD\> strings are used, the date of the file being tested is used to build the path.
+  - ```Folder```: data files location. If ```<YYYY>```, ```<MM>```, ```<DD>``` strings are replaced by the year, month and day of the date of the file being tested. ```?``` is a jocker character.
   - ```FileMask```: data files mask. If \<YYYY\>, \<MM\>, \<DD\> strings are used, the date of the file being tested is used to build the path.
   - other columns: aggregatied information retrieved from the BADM database
 
@@ -88,4 +88,4 @@ python D:\checkETC.py GL-ZaF -d now -y now
 | WTD_1_1_1 | -0.2 | 0.2 | 1 | WTD |
 
 ## Website
-If the report files are used for a website, fhe folder ```website``` contains the main html file (```index.html```), that redirects to the annual report of the present year.
+If the report files are served by a webserver, the folder ```website``` contains the main html file (```index.html```), that redirects to the annual report of the present year.
