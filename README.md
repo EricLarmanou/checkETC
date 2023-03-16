@@ -91,12 +91,12 @@ python D:\checkETC.py GL-ZaF -d now -y now
 | WTD_1_1_1 | 1 | -0.2 | 0.2 | WTD |
 
 ## QC tests
-- Importation: test if the file was imported without error due to wrong format
-- Missing: test missing files
-- Header: test variable names in the header if there is one
-- NbColumns: Test the number of data columns
-- Dates: Test if the timestamp of the last record match with the date contained in the file name.
-- NbRecords: Test that we get the expected number of records, based on the sampling frequency.
+- Importation: Check that the file was imported without error due to wrong format
+- Missing: check if the file is missing
+- Header: If there is a header, check that the variable names match variables specified in the config file (csv)
+- NbColumns: Check the number of data columns
+- Dates: Check if the timestamp of the last record match with the date contained in the file name
+- NbRecords: Check that we get the expected number of records, based on the sampling frequency specified in the 
 - Gaps: Test for data gaps
 - Num: Test that values are numeric
 - nan: Test that values are non NaNs
