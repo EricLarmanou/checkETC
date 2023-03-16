@@ -90,5 +90,19 @@ python D:\checkETC.py GL-ZaF -d now -y now
 | G_2_1_1 | 1 | -50 | 200 | G |
 | WTD_1_1_1 | 1 | -0.2 | 0.2 | WTD |
 
+## QC tests
+- Importation: test if the file was imported without error due to wrong format
+- Missing: test missing files
+- Header: test variable names in the header if there is one
+- NbColumns: Test the number of data columns
+- Dates: Test if the timestamp of the last record match with the date contained in the file name.
+- NbRecords: Test that we get the expected number of records, based on the sampling frequency.
+- Gaps: Test for data gaps
+- Num: Test that values are numeric
+- nan: Test that values are non NaNs
+- Range: Test that values are in the expected range
+- DiagnosticByte: Specific test for li-7200 diagnostic byte
+- TimeEC: EC specific, check milliseconds of timestamps are multiple of 100ms
+
 ## Website
 The html file ```website/index.html``` redirects to the annual report of the present year.
