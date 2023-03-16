@@ -92,16 +92,16 @@ python D:\checkETC.py GL-ZaF -d now -y now
 
 ## QC tests
 - Importation: Check that the file was imported without error due to wrong format
-- Missing: check if the file is missing
+- Missing: Check if there are any missing value
 - Header: If there is a header, check that the variable names match variables specified in the config file (csv)
 - NbColumns: Check the number of data columns
 - Dates: Check if the timestamp of the last record match with the date contained in the file name
 - NbRecords: Check that we get the expected number of records, based on the sampling frequency specified in the 
-- Gaps: Test for data gaps
-- Num: Test that values are numeric
-- nan: Test that values are non NaNs
-- Range: Test that values are in the expected range
-- DiagnosticByte: Specific test for li-7200 diagnostic byte
+- Gaps: Check for data gaps
+- Num: Check that values are numeric
+- nan: Check that values are non NaNs
+- Range: Check that values are in the expected range
+- DiagnosticByte: Specific test for li-7200 diagnostic byte, see description.html or Licor manual
 - TimeEC: EC specific, check milliseconds of timestamps are multiple of 100ms
 
 ## Website
