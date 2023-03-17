@@ -77,8 +77,8 @@ python D:\checkETC.py GL-ZaF -d yesterday -y yesterday
 | EC | TRUE | D:\DATA\\EC\<YYYY> | GL-ZaF_EC_????????????_L01_F01.zip | D:\headersCriteria\EC\GL-ZaF_ECHEADER_202107071330_L01_F01.csv | 0.1 | 48 | 20210707 |  | 1 | 1 | EC | 1 | 1 | .csv | -9999 | No quotes | .zip |
 
 - for each data type, a header file (csv), listing the column names and some criterias:
-  - ```Process``` determines if the variable is tested for numeric values, NaNs and out of range values.
-  -  ```Min``` and ```Max``` are used to test if values are out of range. If set to NaN the test is not performed
+  - ```Process``` determines if the variable is tested for numeric values, NaNs and out of range values. 1=tested, 0=not tested.
+  - ```Min``` and ```Max```: thresholds used to test if values are out of range. If set to NaN, the test is not performed.
   - ```Group``` is a free string field used to group multiple variables in the same figure. If ```Group``` is NaN, the variable is not plotted.
 
 | Variable | Process | Min | Max | Group |
