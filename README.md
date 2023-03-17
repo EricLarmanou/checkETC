@@ -23,30 +23,28 @@ graph TD;
 ## Command line
 It is possible to call the script with arguments.
   ```txt
-  usage: checkETC [-h] [-d [DateStart]] [-e [DateEnd]] [-y [YearsReport]] [Site]
+usage: checkETC [-h] [-d [DateStart]] [-e [DateEnd]] [-y [YearsReport]] [Site]
 
-Check ETC files. Examples: "checkETC GL-ZaF -d now -y now" or "checkETC GL-ZaF
--d 2022-01-01 -e 2022-01-31 -y 2022"
+Check ETC files. Examples: "checkETC GL-ZaF -d yesterday -y yesterday" or "checkETC GL-ZaF -d 2022-01-01 -e 2022-01-31
+-y 2022"
 
 positional arguments:
-  Site              name of the site to check must match the section name in
-                    the ini file (for ex. "GL-ZaF").
+  Site              name of the site to check must match the section name in the ini file (for ex. "GL-ZaF").
 
 optional arguments:
   -h, --help        show this help message and exit
-  -d [DateStart]    Date of the 1st day to check, format yyyy-mm-dd or "now".
-                    If not provided no data file is checked.
-  -e [DateEnd]      Date of the last day to check format yyyy-mm-dd or "now".
-                    If not provided only the data of DateStart is checked.
-  -y [YearsReport]  years used to produce yearly reports, comma-serparated-
-                    list of years or "now". If not provided, no yearly report
-                    is produced.
+  -d [DateStart]    Date of the 1st day to check, format yyyy-mm-dd or "yesterday" or "today". If not provided no data
+                    file is checked.
+  -e [DateEnd]      Date of the last day to check format yyyy-mm-dd or "yesterday" or "today". If not provided only
+                    the data of DateStart is checked.
+  -y [YearsReport]  years used to produce yearly reports, comma-serparated-list of years or "yesterday" or "today". If
+                    not provided, no yearly report is produced.
   ```
   
 Here is example batch file, activating Anaconda, that can be run daily, for example with the Windows Task Scheduler: 
 ```bat
 call C:\ProgramData\Anaconda3\condabin\conda activate
-python D:\checkETC.py GL-ZaF -d now -y now
+python D:\checkETC.py GL-ZaF -d yesterday -y yesterday
 ```
     
 ## Required files:
@@ -96,11 +94,11 @@ python D:\checkETC.py GL-ZaF -d now -y now
 - Header: If there is a header, check that the variable names match variables specified in the config file (csv)
 - NbColumns: Check the number of data columns
 - Dates: Check if the timestamp of the last record match with the date contained in the file name
-- NbRecords: Check that we get the expected number of records, based on the sampling frequency specified in the 
+- NbRecords: Check that we get the expected number of records, based on the sampling frequency specified in the config file (csv)
 - Gaps: Check for data gaps
 - Num: Check that values are numeric
 - nan: Check that values are non NaNs
-- Range: Check that values are in the expected range
+- Range: Check that values fall within the expected range
 - DiagnosticByte: Specific test for li-7200 diagnostic byte, see description.html or Licor manual
 - TimeEC: EC specific, check milliseconds of timestamps are multiple of 100ms
 
