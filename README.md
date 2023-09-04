@@ -69,7 +69,7 @@ python D:\checkETC.py GL-ZaF -d yesterday -y yesterday
   - ```Process```: Boolean defining is the ```Group``` should be processed
   - ```Folder```: data files location. Strings ```<YYYY>```, ```<MM>```, ```<DD>``` are replaced by the year, month and day of the date of the file being tested. ```?``` is a jocker character.
   - ```FileMask```: data files mask. Strings ```<YYYY>```, ```<MM>```, ```<DD>``` are replaced by the year, month and day of the date of the file being tested. ```?``` is a jocker character.
-  - other columns: aggregatied information retrieved from the BADM database.
+  - other columns: aggregated information retrieved from the BADM database.
 
 | Type | Process | Folder | FileMask | FileHeader | Period | NumberFiles | ActiveFrom | ActiveTo | FILE_ID | FILE_LOGGER_ID | FILE_TYPE | FILE_HEAD_NUM | FILE_HEAD_VARS | FILE_EXTENSION | FILE_MISSING_VALUE | FILE_TIMESTAMP | FILE_COMPRESS |
 | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
